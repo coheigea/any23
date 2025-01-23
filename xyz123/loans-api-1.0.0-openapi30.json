@@ -1,0 +1,258 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Loans API",
+    "description" : "Bank loans demo ",
+    "contact" : { },
+    "license" : {
+      "name" : "ASL 2.0"
+    },
+    "version" : "1.0.0"
+  },
+  "paths" : {
+    "/applications" : {
+      "get" : {
+        "summary" : "Get loan applications",
+        "description" : "Get a list of all loan applications accessible to you.",
+        "responses" : {
+          "200" : {
+            "description" : "Status 200",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Application"
+                  }
+                }
+              }
+            }
+          },
+          "4XX" : {
+            "$ref" : "#/components/responses/Error"
+          }
+        }
+      },
+      "post" : {
+        "summary" : "Submit a loan application",
+        "description" : " Create and submit a new loan application.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Application"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Status 201",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "required" : [ "loanId" ],
+                  "properties" : {
+                    "loanId" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "4XX" : {
+            "$ref" : "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/applications/{loanId}" : {
+      "get" : {
+        "summary" : "Get a loan application by ID",
+        "description" : "Get a specific loan application using its ID.",
+        "responses" : {
+          "200" : {
+            "description" : "Status 200",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Application"
+                }
+              }
+            }
+          },
+          "4XX" : {
+            "$ref" : "#/components/responses/Error"
+          }
+        }
+      },
+      "put" : {
+        "summary" : "Update a loan application",
+        "description" : "Update an existing loan application.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Application"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Status 201"
+          },
+          "4XX" : {
+            "$ref" : "#/components/responses/Error"
+          }
+        }
+      },
+      "delete" : {
+        "summary" : "Cancel a loan application",
+        "description" : "Cancel an existing loan application.",
+        "responses" : {
+          "200" : {
+            "description" : "Status 200"
+          },
+          "4XX" : {
+            "$ref" : "#/components/responses/Error"
+          }
+        }
+      },
+      "parameters" : [ {
+        "name" : "loanId",
+        "in" : "path",
+        "required" : true,
+        "schema" : {
+          "type" : "string"
+        }
+      } ]
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Address" : {
+        "type" : "object",
+        "properties" : {
+          "street" : {
+            "type" : "string"
+          },
+          "street2" : {
+            "type" : "string"
+          },
+          "postCode" : {
+            "type" : "string"
+          },
+          "city" : {
+            "type" : "string"
+          },
+          "state" : {
+            "type" : "string"
+          }
+        },
+        "example" : "{\n\t\"street\": \"3185 Gateway Avenue\",\n\t\"street2\": \"\",\n\t\"postCode\": \"93301\",\n\t\"city\": \"Bakersfield\",\n\t\"state\": \"CA\"\n}"
+      },
+      "Personal" : {
+        "type" : "object",
+        "required" : [ "address", "firstName", "lastName" ],
+        "properties" : {
+          "lastName" : {
+            "type" : "string",
+            "default" : "Smith"
+          },
+          "firstName" : {
+            "type" : "string",
+            "example" : "John"
+          },
+          "address" : {
+            "$ref" : "#/components/schemas/Address"
+          }
+        }
+      },
+      "Business" : {
+        "type" : "object",
+        "required" : [ "address", "businessName", "businessType" ],
+        "properties" : {
+          "businessName" : {
+            "type" : "string",
+            "example" : "Smith Films"
+          },
+          "businessType" : {
+            "type" : "string",
+            "enum" : [ "soleProprietorship", "partnership", "corporation" ]
+          },
+          "address" : {
+            "$ref" : "#/components/schemas/Address"
+          }
+        }
+      },
+      "Application" : {
+        "type" : "object",
+        "required" : [ "applicantDetails", "applicationStatus", "loanDetails", "loanId", "loanType" ],
+        "properties" : {
+          "loanId" : {
+            "type" : "string",
+            "readOnly" : true
+          },
+          "loanType" : {
+            "type" : "string",
+            "enum" : [ "business", "personal" ]
+          },
+          "applicantDetails" : {
+            "oneOf" : [ {
+              "$ref" : "#/components/schemas/Business"
+            }, {
+              "$ref" : "#/components/schemas/Personal"
+            } ]
+          },
+          "applicationStatus" : {
+            "type" : "string",
+            "readOnly" : true,
+            "enum" : [ "pending", "approved", "rejected" ]
+          },
+          "loanDetails" : {
+            "type" : "object",
+            "required" : [ "amount", "length", "monthlyPayment" ],
+            "properties" : {
+              "amount" : {
+                "type" : "number"
+              },
+              "length" : {
+                "type" : "integer"
+              },
+              "monthlyPayment" : {
+                "type" : "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses" : {
+      "Error" : {
+        "description" : "An error to return",
+        "content" : {
+          "application/json" : {
+            "schema" : {
+              "type" : "object",
+              "properties" : {
+                "message" : {
+                  "type" : "string",
+                  "description" : "An error occurred, please try again or contact"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes" : {
+      "Bearer_authentication" : {
+        "type" : "http",
+        "scheme" : "bearer"
+      }
+    }
+  }
+}
